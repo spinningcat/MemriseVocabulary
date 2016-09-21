@@ -1,0 +1,11 @@
+{
+  "name": "MemriseVocabulary",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "https://github.com/emrahoner/MemriseVocabulary",
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.1.0"
+  }
+}

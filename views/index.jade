@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  input#username(type="text")
+  input#password(type="password")
+  button(value="Login", onclick="$.post('/login', { username: $('#username').val(), password: $('#password').val() })") Login
