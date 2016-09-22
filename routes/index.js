@@ -9,10 +9,26 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/q/:word', function(req, res, next) {
+router.get('/q/oxford/:word', function(req, res, next) {
   var responseObj = res;
   var childArgs = [
-    path.join(__dirname, '../phantomjs/word-english-definition.js'),
+    path.join(__dirname, '../phantomjs/oxford-definition.js'),
+    req.params.word
+  ]
+
+  childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
+    if(err) {
+      responseObj.send(err);
+    } else {
+      responseObj.send(stdout);
+    }
+  });
+});
+
+router.get('/q/zargan/:word', function(req, res, next) {
+  var responseObj = res;
+  var childArgs = [
+    path.join(__dirname, '../phantomjs/zargan-definition.js'),
     req.params.word
   ]
 

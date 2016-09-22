@@ -78,7 +78,7 @@ function getCookie(page, onsuccess, onerror) {
 
   page.onResourceRequested = function(request) {
     //if(request.url.indexOf('memrise.com/') >= 0) {
-      console.log('Request ' + JSON.stringify(request));
+      console.log('Request ' + JSON.stringify(request.headers));
 
     //}
   };
@@ -91,13 +91,23 @@ function getCookie(page, onsuccess, onerror) {
   };
 
   page.open("http://www.memrise.com/home/", function(status) {
-    phantom.exit();
-    page.onResourceRequested = null;
+    //page.onResourceRequested = null;
+
+    setTimeout(function() {
+      var list = page.evaluate(function() {
+        return $('.course-cards-component.js-course-cards-component').html();
+      });
+
+      console.log(list);
+      phantom.exit();
+
+    },2000);
+/*
     if ( status === "success" ) {
       onsucces({ cookie: cookie });
     } else {
       onerror('Error occured while fetching cookie');
-    }
+    }*/
   });
 }
 
