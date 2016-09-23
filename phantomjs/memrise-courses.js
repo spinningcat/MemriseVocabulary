@@ -4,17 +4,6 @@ var page = require('webpage').create();
 var username = system.args[1];
 var password = system.args[2];
 
-function getCookieString(cookies) {
-  var str = '';
-  for(var i = 0; i < cookies.length; i++) {
-    str += cookies[i].name + '=' + cookies[i].value;
-    if(i < cookies.length - 1) {
-      str += '; ';
-    }
-  }
-  return str;
-}
-
 function getLoginPage(page, onsuccess, onerror) {
   var settings = {
     headers: {
@@ -25,7 +14,7 @@ function getLoginPage(page, onsuccess, onerror) {
   page.open("https://www.memrise.com/login/", settings, function(status) {
       if ( status === "success" ) {
         if(page.injectJs('../public/javascripts/jquery.js')) {
-          onsuccess();
+          onsuccess('Login page of memrise is successfully opened');
           return;
         }
       }
@@ -62,7 +51,12 @@ function submitLoginInfo(page, username, password, onsuccess, onerror) {
 
       if(isComplete) {
         clearInterval(interval);
-        onsuccess({ url: page.url });
+        if(page.url.indexOf('www.memrise.com/home/') >= 0) {
+          onsuccess('Login to memrise is successful');
+        }
+        else {
+          onerror('Login to memrise is failed');
+        }
       } else if(isTimedOut) {
         clearInterval(interval);
         onerror('Timeout is occured while submitting login form');
@@ -73,53 +67,60 @@ function submitLoginInfo(page, username, password, onsuccess, onerror) {
   }
 }
 
-function getCookie(page, onsuccess, onerror) {
-  var cookie = "";
+function getCourseList(page, onsuccess, onerror) {
+  page.evaluate(function() {
+    var WindowScroller = (function(window, document) {
+      return function() {
+        var _window = window;
+        var _document = document;
+        var timeout = 5000;
 
-  page.onResourceRequested = function(request) {
-    //if(request.url.indexOf('memrise.com/') >= 0) {
-      console.log('Request ' + JSON.stringify(request.headers));
+        function scrollBottom() {
+          var bodyHeight = _document.getElementsByTagName('body')[0].scrollHeight;
+          _window.scrollTo(0, bodyHeight);
+          return bodyHeight;
+        }
 
-    //}
-  };
+        function isToGo(preHeight) {
+          var bodyHeight = _document.getElementsByTagName('body')[0].scrollHeight;
+          return preHeight < bodyHeight;
+        }
 
-  page.onResourceReceived = function(request) {
-    //if(request.url.indexOf('memrise.com/') >= 0) {
-      console.log('Response ' + JSON.stringify(request));
+        this.start = function(onexit) {
+          var height = scrollBottom();
+          var initTime = new Date().getTime();
 
-    //}
-  };
+          var interval = setInterval(function () {
+            if(isToGo(height)) {
+              initTime = new Date().getTime();
+              height = scrollBottom();
+            } else if(new Date().getTime() - initTime > timeout) {
+              clearInterval(interval);
 
-  page.open("http://www.memrise.com/home/", function(status) {
-    //page.onResourceRequested = null;
+              if(onexit) {
+                onexit();
+              }
+            }
+          }, 250);
+        }
+      }
+    })(window, document);
 
-    setTimeout(function() {
-      var list = page.evaluate(function() {
-        return $('.course-cards-component.js-course-cards-component').html();
+    var scroller = new WindowScroller(window, document);
+    scroller.start(function() {
+      var coursesContainer = $('.course-cards-component.js-course-cards-component').find('.course-card-container.js-course-card-container').find('.card-main-container .wrapper > .detail > .title > a');
+      var courses = [];
+      coursesContainer.each(function(index, item) {
+        courses.push({ title: $(item).text().trim(), url: $(item).attr('href') });
       });
 
-      console.log(list);
-      phantom.exit();
-
-    },2000);
-/*
-    if ( status === "success" ) {
-      onsucces({ cookie: cookie });
-    } else {
-      onerror('Error occured while fetching cookie');
-    }*/
+      onsuccess(courses);
+    });
   });
 }
 
-function getCourseList(page, cookie, onsuccess, onerror) {
+function getDetailOFEditableCourses(page, courses, onsuccess, onerror) {
 
-  page.open("http://www.memrise.com/ajax/courses/dashboard/?courses_filter=most_recent&offset=0&limit=4&get_review_count=false", function(status) {
-      if ( status === "success" ) {
-        onsucces({ cookie: cookie, result: 'ds' });
-      } else {
-        onerror('Error occured while fetching courses');
-      }
-    });
 }
 
 var Flow = (function(config) {
@@ -168,12 +169,15 @@ var Flow = (function(config) {
   }
 });
 
+console.log('asdfasdf');
+phantom.exit();
+
 var flow = new Flow({
   flow : [
     { func: getLoginPage, params: [page] },
-    { func: submitLoginInfo, params: [page, username, password] },
-    { func: getCookie, params: [page] }
-    //{ func: getCourseList, params: function(data) {  return [page, data.cookie]; } },
+    //{ func: submitLoginInfo, params: [page, username, password] },
+    //{ func: getCourseList, params: [page] },
+    //{ func: getCourseList, params: function(data) { return []; } }
   ]
 });
 
