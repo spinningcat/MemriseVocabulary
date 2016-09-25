@@ -12,6 +12,7 @@ router.get('/', function(req, res, next) {
 router.get('/q/oxford/:word', function(req, res, next) {
   var responseObj = res;
   var childArgs = [
+    '--ssl-protocol=any',
     path.join(__dirname, '../phantomjs/oxford-definition.js'),
     req.params.word
   ]
@@ -20,7 +21,7 @@ router.get('/q/oxford/:word', function(req, res, next) {
     if(err) {
       responseObj.send(err);
     } else {
-      responseObj.send(stdout);
+      responseObj.send(JSON.parse(stdout));
     }
   });
 });
@@ -28,6 +29,7 @@ router.get('/q/oxford/:word', function(req, res, next) {
 router.get('/q/zargan/:word', function(req, res, next) {
   var responseObj = res;
   var childArgs = [
+    '--ssl-protocol=any',
     path.join(__dirname, '../phantomjs/zargan-definition.js'),
     req.params.word
   ]
@@ -36,7 +38,7 @@ router.get('/q/zargan/:word', function(req, res, next) {
     if(err) {
       responseObj.send(err);
     } else {
-      responseObj.send(stdout);
+      responseObj.send(JSON.parse(stdout));
     }
   });
 });
@@ -44,22 +46,21 @@ router.get('/q/zargan/:word', function(req, res, next) {
 router.post('/login/', function(req, res, next) {
   var responseObj = res;
   var childArgs = [
+    '--ssl-protocol=any',
+    '--ignore-ssl-errors=yes',
     path.join(__dirname, '../phantomjs/memrise-courses.js'),
     req.body.username,
-    req.body.password
+    req.body.password,
+    'courselist'
   ];
 
   childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
-    if(stderr) {
-      console.log(stderr);
-      responseObj.send(stderr);
-    }
-    else if(err) {
+    if(err) {
       console.log(err);
       responseObj.send(err);
     } else {
       console.log(stdout);
-      responseObj.send(stdout);
+      responseObj.send(JSON.parse(stdout));
     }
   });
 });

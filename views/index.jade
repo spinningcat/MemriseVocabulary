@@ -1,9 +1,57 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
 
-  input#username(type="text")
-  input#password(type="password")
-  button(value="Login", onclick="$.post('/login', { username: $('#username').val(), password: $('#password').val() })") Login
+  div(style='height:100px;')
+
+  div.row
+    h1 Welcome
+    p This tool will help you to prepare your word list with their meaning and example sentences. And also you can add these words to your memrise courses.
+    p Firstly you have to login memrise to fetch the list of your editable courses. After login, search tool will appear and by searching the meaning of the word, you will select the desired meaning for word and you will add the word to the desired course level.
+
+  div(style='height:50px;')
+
+  div#loginForm
+    div.row
+      p Enter your memrise username and password
+    div.row
+      div.medium-2.column
+        span Username
+      div.medium-10.column
+        input#username(type="text")
+    div.row
+      div.medium-2.column
+        span Password
+      div.medium-10.column
+        input#password(type="password")
+    div.row
+      div.medium-12.column
+        button.right.button(type="button", value="Login", onclick="Login();") Login
+
+  div#searchForm(style='display:none;')
+    div.row
+      p Enter the word that you want to search
+    div.row
+      div.medium-2.column
+        span Word
+      div.medium-8.column
+        input#word(type="text")
+      div.medium-2.column
+        button.right.button(type="button", value="Search", onclick="Search();") Search
+
+  div#searchResult(style='display:none;')
+    div.row
+      div.medium-2.column
+        span Language
+      div.medium-2.column
+        input#english(type="radio", name='language', value='english', onchange="LanguageChange()")
+        label(for="english") English
+      div.medium-2.column
+        input#turkish(type="radio", name='language', value='turkish', onchange="LanguageChange()")
+        label(for="turkish") Turkish
+      div.medium-6.column
+    div#meaningResult.row(style="display:none;")
+      div.medium-2.column
+        span Meaning
+      div.medium-10.column
+        select#meaning

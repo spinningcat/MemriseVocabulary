@@ -11,17 +11,27 @@ page.open("https://en.oxforddictionaries.com/definition/" + word, function(statu
           var result = { word: word, pronunciation: $('h2.hwg a.headwordAudio audio').attr('src'), definitions : [] };
           var grambs = $('section.gramb').each(function(index, item) {
             var type = $(item).find('h3.ps.pos span.pos').text().trim();
+            var number = 0;
 
             $(item).find('> ul.semb > li').each(function(index, item) {
-              var defItem = { type: type, definition : $(item).find('> div.trg > p > span.ind').text().trim(), example: $(item).find('> div.trg > div.examples:first > div.exg > ul > li.ex:first > em').text().trim(), sub_definitions: [] };
+              var subNumber = 0;
+              number++;
+              result.definitions.push({
+                  id: number,
+                  type: type,
+                  definition : $(item).find('> div.trg > p > span.ind').text().trim(),
+                  example: $(item).find('> div.trg > div.examples:first > div.exg > ul > li.ex:first > em').text().trim()
+                });
 
               $(item).find('> div.trg > ol.subSenses > li.subSense').each(function(index, item) {
-                var subDefItem = { type: type, definition: $(item).find('> span.ind').text().trim(), example: $(item).find('> div.trg > div.examples > div.exg > ul > li.ex:first > em').text().trim() };
-
-                defItem.sub_definitions.push(subDefItem);
+                subNumber++;
+                result.definitions.push({
+                  id: number + '.' + subNumber,
+                  type: type,
+                  definition: $(item).find('> span.ind').text().trim(),
+                  example: $(item).find('> div.trg > div.examples > div.exg > ul > li.ex:first > em').text().trim()
+                });
               });
-
-              result.definitions.push(defItem);
             });
           });
           return result;

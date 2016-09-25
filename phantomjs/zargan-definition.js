@@ -15,8 +15,9 @@ page.open("http://www.zargan.com/en/q/" + word, function(status) {
             var title = $(item).find('> .contentTitle').html().trim();
 
             if(title.indexOf('English-Turkish Translation') >= 0) {
-
+              var number = 0;
               $(item).find('> .contentWrapper > .numberedList > ol > li').each(function(index, item) {
+                number++;
                 var definitionContainer = $(item);
                 var type = definitionContainer.find('span.red').html().trim();
                 definitionContainer.find('span.red').remove();
@@ -31,11 +32,17 @@ page.open("http://www.zargan.com/en/q/" + word, function(status) {
                   examples.push(child.text());
                   child.replaceWith('<br/>');
                 }
+
                 var example = ''
                 if(examples.length > 0)
                   example = examples[0].trim();
-                var definition = { type: type, definition: definitionContainer.html().split('<br>')[0].trim(), example: example, sub_definitions: [] };
-                result.definitions.push(definition);
+
+                result.definitions.push({
+                  id: number,
+                  type: type,
+                  definition: definitionContainer.html().split('<br>')[0].trim(),
+                  example: example
+                });
               });
             }
           });

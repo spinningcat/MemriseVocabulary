@@ -3,6 +3,15 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+    <link rel="stylesheet" href="/stylesheets/foundation.css" />
     script(src='/javascripts/jquery.js')
+    script(src='/javascripts/foundation.js')
+    script(src='/javascripts/index.js')
+
   body
     block content
+    script $(document).foundation();
+
+  div#loadingModal.reveal-modal(aria-hidden="true", role="dialog", data-reveal)
+    <p>In progress ...</p>
+  </div>
