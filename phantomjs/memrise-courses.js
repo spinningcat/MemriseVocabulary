@@ -126,7 +126,7 @@ function getLoginPage(page, onsuccess, onerror) {
   page.open("https://www.memrise.com/login/", settings, function(status) {
       if ( status === "success" ) {
         if(page.injectJs('../public/javascripts/jquery.js')) {
-          onsuccess();
+          onsuccess('Login page of memrise is successfully opened');
           return;
         }
       }
@@ -163,7 +163,12 @@ function submitLoginInfo(page, username, password, onsuccess, onerror) {
 
       if(isComplete) {
         clearInterval(interval);
-        onsuccess({ url: page.url });
+        if(page.url.indexOf('www.memrise.com/home/') >= 0) {
+          onsuccess('Login to memrise is successful');
+        }
+        else {
+          onerror('Login to memrise is failed');
+        }
       } else if(isTimedOut) {
         clearInterval(interval);
         onerror('Timeout is occured while submitting login form');
