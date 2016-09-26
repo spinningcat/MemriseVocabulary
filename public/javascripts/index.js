@@ -160,8 +160,41 @@ function renderWordList() {
 
 function AddWord() {
   var definition = getSelectedDefinition();
-  wordList.push(definition);
+  var isExists = false;
+  wordList.forEach(function(item, index) {
+    if(item.word == definition.word) {
+      isExists = true;
+      item.definition = definition.definition;
+      item.example = definition.example;
+    }
+  });
+  if(!isExists) {
+    wordList.push(definition);
+  }
   renderWordList();
+}
+
+function AddToMemrise() {
+  var levelId = $('#level').val();
+  var format = $('#format').val();
+  var data = '';
+
+  showLoading();
+
+  wordList.forEach(function(item, index) {
+    data += format.toLowerCase().replace(/,/g, '\t').replace(/word/g, item.word).replace(/example/g, item.example).replace(/definition/g, item.definition) + '\n';
+  });
+
+  $.post('/addtomemrise', { username: username, password: password, data: encodeURIComponent(data), levelId: levelId }).done(function(result) {
+    if(result.isSuccessful) {
+      $('#searchResult').hide();
+      wordList = [];
+      renderWordList();
+    } else {
+      alert(result.error);
+    }
+    hideLoading();
+  });
 }
 
 function showLoading() {

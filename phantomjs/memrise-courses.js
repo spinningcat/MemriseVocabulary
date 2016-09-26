@@ -347,10 +347,27 @@ function addBulkWords(page, data, levelId, onsuccess, onerror) {
     }
     window.MemriseVocabulary.IsWordsAdded = false;
 
-    $.post('http://www.memrise.com/ajax/level/add_things_in_bulk/', { word_delimiter:'tab', data: data, level_id : levelId }).done(function(data) {
+    $.post('http://www.memrise.com/ajax/level/add_things_in_bulk/', { word_delimiter:'tab', data: decodeURIComponent(data), level_id : levelId }).done(function(data) {
       window.MemriseVocabulary.IsWordsAdded = true;
     });
   }, data, levelId);
+
+  var timeout = 10000; // 10 sec
+  var startTime = new Date().getTime();
+  var interval = setInterval(function() {
+    var isTimedOut = new Date().getTime() - startTime >= timeout;
+    var isComplete = page.evaluate(function() {
+      return window.MemriseVocabulary && window.MemriseVocabulary.IsWordsAdded;
+    });
+
+    if(isComplete) {
+      clearInterval(interval);
+      onsuccess({data: data, levelId: levelId});
+    } else if(isTimedOut) {
+      clearInterval(interval);
+      onerror('Timeout is occured while adding words');
+    }
+  }, 250);
 }
 
 var flowArray = null;

@@ -65,4 +65,28 @@ router.post('/login/', function(req, res, next) {
   });
 });
 
+router.post('/addtomemrise/', function(req, res, next) {
+  var responseObj = res;
+  var childArgs = [
+    '--ssl-protocol=any',
+    '--ignore-ssl-errors=yes',
+    path.join(__dirname, '../phantomjs/memrise-courses.js'),
+    req.body.username,
+    req.body.password,
+    'addwords',
+    req.body.data,
+    req.body.levelId
+  ];
+
+  childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
+    if(err) {
+      console.log(err);
+      responseObj.send(err);
+    } else {
+      console.log(stdout);
+      responseObj.send(JSON.parse(stdout));
+    }
+  });
+});
+
 module.exports = router;
