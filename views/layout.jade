@@ -2,20 +2,21 @@ doctype html
 html
   head
     title= title
+    meta(name="viewport", content="width=device-width, initial-scale=1")
 
-    link(rel="stylesheet", href="/stylesheets/normalize.css")
-    link(rel="stylesheet", href="/stylesheets/skeleton.css")
+    link(rel="stylesheet", href="/stylesheets/bootstrap.css")
+    link(rel="stylesheet", href="/stylesheets/bootstrap-theme.css")
     link(rel='stylesheet', href='/stylesheets/style.css')
 
     script(src='/javascripts/jquery.js')
+    script(src='/javascripts/bootstrap.js')
     script(src='/javascripts/index.js')
 
   body
     div.container
       block content
 
-    div#loadingModal.reveal-modal(aria-hidden="true", role="dialog", data-reveal)
-      p
-        In progress ...
-
-    script $('div').show();
+    div#loadingModal.modal.fade(role="dialog")
+      div.modal-dialog(role="document")
+        div
+          img(src="/images/loading.gif", style='width:10em;')

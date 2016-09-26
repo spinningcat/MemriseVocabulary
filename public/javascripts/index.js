@@ -123,9 +123,17 @@ function AddWord() {
 }
 
 function showLoading() {
-  $('#loadingModal').foundation('reveal','open');
+  $('#loadingModal').modal('show');
 }
 
 function hideLoading() {
-  $('#loadingModal').foundation('reveal','close');
+  $('#loadingModal').modal('hide');
 }
+
+$(document).ready(function() {
+  $('#loadingModal').modal({
+    backdrop: 'static',
+    keyboard: false,
+    show: false
+  });
+});

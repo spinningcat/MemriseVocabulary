@@ -2,75 +2,80 @@ extends layout
 
 block content
 
-  div(style='height:100px;')
+  div(style='height:50px;')
 
   div.row
     h1 Welcome
     p This tool will help you to prepare your word list with their meaning and example sentences. And also you can add these words to your memrise courses.
     p Firstly you have to login memrise to fetch the list of your editable courses. After login, search tool will appear and by searching the meaning of the word, you will select the desired meaning for word and you will add the word to the desired course level.
 
-  div(style='height:50px;')
+  div(style='height:25px;')
 
-  div#loginForm
-    div.row
+  form#loginForm.form-horizontal
+    div.form-group
       p Enter your memrise username and password
-    div.row
-      div.two.columns
+    div.form-group
+      div.col-md-2
         label(for="username") Username
-      div.ten.columns
-        input#username.u-full-width(type="text")
-    div.row
-      div.two.columns
+      div.col-md-10
+        input#username.form-control(type="text")
+    div.form-group
+      div.col-md-2
         label(for="password") Password
-      div.ten.columns
-        input#password.u-full-width(type="password")
-    div.row
-      div.ten.columns &nbsp;
-      div.two.columns
-        button.button-primary.u-full-width(type="button", value="Login", onclick="Login();") Login
+      div.col-md-10
+        input#password.form-control(type="password")
+    div.form-group
+      div.col-md-10 &nbsp;
+      div.col-md-2
+        button.btn.btn-primary.btn-block(type="button", value="Login", onclick="Login();") Login
 
-  div#searchForm(style='display:none;')
-    div.row
+  form#searchForm.form-horizontal(style='display:none;')
+    div.form-group
       p Select the course in which the word will be added
       p Enter the format of the course
       p Enter the word that you want to search and hit Search button
-    div.row
-      div.two.columns
+    div.form-group
+      div.col-md-2
         label Course
-      div.four.columns
-        select#course.u-full-width(onchange="CourseSelected()")
-      div.four.columns
-        select#level.u-full-width
-      div.two.columns
-    div.row
-      div.two.columns
+      div.col-md-4
+        select#course.form-control(onchange="CourseSelected()")
+      div.col-md-4
+        select#level.form-control
+      div.col-md-2
+    div.form-group
+      div.col-md-2
         label(for="format") Format
-      div.eight.columns
-        input#format.u-full-width(type="text", value="word,definition,example")
-      div.two.columns
-    div.row
-      div.two.columns
+      div.col-md-8
+        input#format.form-control(type="text", value="word,definition,example")
+      div.col-md-2
+    div.form-group
+      div.col-md-2
         label(for="word") Word
-      div.eight.columns
-        input#word.u-full-width(type="text")
-      div.two.columns
-        button.button-primary.u-full-width(type="button", value="Search", onclick="Search();") Search
+      div.col-md-8
+        input#word.form-control(type="text")
+      div.col-md-2
+        div.button-group
+          button.btn.btn-primary.btn-block(type="button", value="Search", onclick="Search();") Search
 
-  div#searchResult(style='display:none;')
-    div.row
-      div.two.columns
+  form#searchResult.form-horizontal(style='display:none;')
+    div.form-group
+      div.col-md-2
         label Language
-      div.two.columns
-        input#english(type="radio", name='language', value='english', onchange="LanguageChange()")
-        label.radio-label(for="english") English
-      div.two.columns
-        input#turkish(type="radio", name='language', value='turkish', onchange="LanguageChange()")
-        label.radio-label(for="turkish") Turkish
-      div.six.columns
-    div#meaningResult.row(style="display:none;")
-      div.two.columns
+      div.col-md-2.col-xs-6
+        div.radio
+          label
+            input#english(type="radio", name='language', value='english', onchange="LanguageChange()")
+            | English
+      div.col-md-2.col-xs-6
+        div.radio
+          label
+            input#turkish(type="radio", name='language', value='turkish', onchange="LanguageChange()")
+            | Turkish
+      div.col-md-6
+    div#meaningResult.form-group(style="display:none;")
+      div.col-md-2
         label(for="meaning") Meaning
-      div.eight.columns
-        select#meaning.u-full-width
-      div.two.columns
-        button.button-primary.u-full-width(type="button", value="AddWord", onclick="AddWord();") Add
+      div.col-md-8
+        select#meaning.form-control
+      div.col-md-2
+        button.btn.btn-primary.btn-block(type="button", value="AddWord", onclick="AddWord();") Add
