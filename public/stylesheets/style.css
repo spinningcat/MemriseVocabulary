@@ -6,3 +6,11 @@ body {
 a {
   color: #00B7FF;
 }
+
+label {
+  display: initial;
+}
+
+.radio-label {
+  margin-left: .5rem;
+}

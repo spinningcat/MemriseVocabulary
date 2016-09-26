@@ -8,7 +8,7 @@ var turkishMeanings = null;
 function AfterLogin() {
   $('#level').html('');
 
-  var options = '';
+  var options = '<option value="-1">Please select course</option>';
   memrise.forEach(function(item, index) {
     options += '<option value="' + item.id + '">' + item.title + '</option>';
   });
@@ -40,10 +40,11 @@ function Login() {
 
 function CourseSelected() {
   var course = $('#course').val();
+  $('#level').html('');
   if(course && memrise) {
     memrise.forEach(function(item, index) {
       if(item.id == course) {
-        var options = '';
+        var options = '<option value="-1">Please select level</option>';
         item.subCourses.forEach(function(item, index) {
           options += '<option value="' + item.id + '">' + item.name + '</option>';
         });
