@@ -30,7 +30,23 @@ block content
 
   div#searchForm(style='display:none;')
     div.row
-      p Enter the word that you want to search
+      p Select the course in which the word will be added
+      p Enter the format of the course
+      p Enter the word that you want to search and hit Search button
+    div.row
+      div.medium-2.column
+        span Course
+      div.medium-4.column
+        select#course(onchange="CourseSelected()")
+      div.medium-4.column
+        select#level
+      div.medium-2
+    div.row
+      div.medium-2.column
+        span Format
+      div.medium-8.column
+        input#format(type="text", value="word,definition,example")
+      div.medium-2.column
     div.row
       div.medium-2.column
         span Word
@@ -53,5 +69,7 @@ block content
     div#meaningResult.row(style="display:none;")
       div.medium-2.column
         span Meaning
-      div.medium-10.column
+      div.medium-8.column
         select#meaning
+      div.medium-2.column
+        button.right.button(type="button", value="AddWord", onclick="AddWord();") Add
