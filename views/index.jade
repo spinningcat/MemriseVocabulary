@@ -79,3 +79,13 @@ block content
         select#meaning.form-control
       div.col-md-2
         button.btn.btn-primary.btn-block(type="button", value="AddWord", onclick="AddWord();") Add
+
+  form#wordListForm.form-horizontal(style='display:none;')
+    div.form-group
+      div.col-md-12
+        label Word List
+      div#wordList.col-md-12.word-list
+    div.form-group
+      div.col-md-10 &nbsp;
+      div.col-md-2
+        button.btn.btn-primary.btn-block(type="button", value="AddToMemrise", onclick="AddToMemrise();") Add To Memrise

@@ -31,3 +31,22 @@ input[type="radio"] {
   text-align: left;
   vertical-align: middle;
 }
+
+.word-list {
+  height: 15em;
+  overflow-y: scroll;
+}
+
+.word-line {
+  margin-bottom: 1em;
+}
+
+.word-list .word {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+}
+
+.word-list .example {
+  font-style: italic;
+}

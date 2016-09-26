@@ -9,9 +9,9 @@ page.open("https://en.oxforddictionaries.com/definition/" + word, function(statu
         var res = page.evaluate(function(word) {
 
           var result = { word: word, pronunciation: $('h2.hwg a.headwordAudio audio').attr('src'), definitions : [] };
+          var number = 0;
           var grambs = $('section.gramb').each(function(index, item) {
             var type = $(item).find('h3.ps.pos span.pos').text().trim();
-            var number = 0;
 
             $(item).find('> ul.semb > li').each(function(index, item) {
               var subNumber = 0;

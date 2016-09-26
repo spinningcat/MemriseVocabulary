@@ -5,6 +5,8 @@ var memrise = null;
 var englishMeanings = null;
 var turkishMeanings = null;
 
+var wordList = [];
+
 function AfterLogin() {
   $('#level').html('');
 
@@ -16,6 +18,7 @@ function AfterLogin() {
 
   $('#loginForm').hide();
   $('#searchForm').show();
+  $('#wordListForm').show();
 }
 
 function Login() {
@@ -74,6 +77,8 @@ function Search() {
   englishMeanings = null;
   turkishMeanings = null;
 
+  $('#english').prop('checked', '');
+  $('#turkish').prop('checked', '');
   $('#searchResult').hide();
   $('#meaningResult').hide();
   $('#meaning').html('');
@@ -111,15 +116,52 @@ function LanguageChange() {
   }
 }
 
-function AddWord() {
-  var level = $('#level').val();
-  var format= $('#format').val();
-  var meaning = $('#meaning').val();
-
-  if(!level || !format || !meaning) {
-    alert('course, format and meaning is required');
-    return;
+function getSelectedDefinition() {
+  var meanings = null;
+  if($('#english').prop('checked')) {
+    meanings = englishMeanings;
+  } else if($('#turkish').prop('checked')) {
+    meanings = turkishMeanings;
   }
+
+  var definition = null;
+  var selectedDefinition = $('#meaning').val();
+  meanings.definitions.forEach(function(item, index) {
+    if(item.id == selectedDefinition) {
+      definition = { definition: item.definition, example: item.example };
+    }
+  });
+
+  if(definition) {
+    definition.word = meanings.word;
+    if(englishMeanings && englishMeanings.word == meanings.word) {
+      definition.pronunciation = englishMeanings.pronunciation;
+    }
+  }
+  return definition;
+}
+
+function renderWordList() {
+  var html = '';
+  wordList.forEach(function(item, index) {
+    html += '<div class="container word-line">';
+    html += '<div class="row">';
+    html += '<div class="col-lg-2 col-xs-12 word">' + item.word + '</div>';
+    html += '<div class="col-lg-10 col-xs-12">' + item.definition + '</div>';
+    html += '</div>';
+    html += '<div class="row">';
+    html += '<div class="col-lg-2 hidden-xs"></div>';
+    html += '<div class="col-lg-10 col-xs-12 example">' + item.example + '</div>';
+    html += '</div>';
+    html += '</div>';
+  });
+  $('#wordList').html(html);
+}
+
+function AddWord() {
+  var definition = getSelectedDefinition();
+  wordList.push(definition);
+  renderWordList();
 }
 
 function showLoading() {
