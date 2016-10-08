@@ -61,24 +61,42 @@ block content
     div.form-group
       div.col-md-2
         label Language
-      div.col-md-2.col-xs-6
+      div.col-md-2.col-xs-4
         div.radio
           label
             input#english(type="radio", name='language', value='english', onchange="LanguageChange()")
-            | English
-      div.col-md-2.col-xs-6
+            | Oxford
+      div.col-md-2.col-xs-4
+        div.radio
+          label
+            input#cambridge(type="radio", name='language', value='cambridge', onchange="LanguageChange()")
+            | Cambridge
+      div.col-md-2.col-xs-4
         div.radio
           label
             input#turkish(type="radio", name='language', value='turkish', onchange="LanguageChange()")
             | Turkish
       div.col-md-6
     div#meaningResult.form-group(style="display:none;")
-      div.col-md-2
-        label(for="meaning") Meaning
-      div.col-md-8
-        select#meaning.form-control
-      div.col-md-2
-        button.btn.btn-primary.btn-block(type="button", value="AddWord", onclick="AddWord();") Add
+      div.row
+        div.col-md-2
+          label(for="meaning") Meaning In Dictionary
+        div.col-md-8
+          select#meaning.form-control(onchange="WordSelected();")
+        div.col-md-2
+      div.row
+        div.col-md-2
+          label(for="definition") Definition
+        div.col-md-8
+          input#definition.form-control(type="text")
+        div.col-md-2
+      div.row
+        div.col-md-2
+          label(for="example") Example
+        div.col-md-8
+          input#example.form-control(type="text")
+        div.col-md-2
+          button.btn.btn-primary.btn-block(type="button", value="AddWord", onclick="AddWord();") Add
 
   form#wordListForm.form-horizontal(style='display:none;')
     div.form-group

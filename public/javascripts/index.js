@@ -3,6 +3,7 @@ var password = '';
 
 var memrise = null;
 var englishMeanings = null;
+var cambridgeMeanings = null;
 var turkishMeanings = null;
 
 var wordList = [];
@@ -30,6 +31,13 @@ function Login() {
     return;
   }
   showLoading();
+
+/*
+  memrise = [{"title":"Test","url":"http://www.memrise.com/course/1239080/test/","editUrl":"http://www.memrise.com/course/1239080/test/edit/","id":"1239080","subCourses":[{"dbId":"2210846","id":"4770141","name":"Hebele"},{"dbId":"2210846","id":"4770143","name":"Hubele"}]},{"title":"TOEFL Vocabulary","url":"http://www.memrise.com/course/1222368/toefl-vocabulary/","editUrl":"http://www.memrise.com/course/1222368/toefl-vocabulary/edit/","id":"1222368","subCourses":[{"dbId":"2193641","id":"4719043","name":"Longman Prep. Course for the TOEFL IBT Test"},{"dbId":"2193641","id":"4719053","name":"New level"}]},{"title":"GRE Vocabulary","url":"http://www.memrise.com/course/1208609/gre-vocabulary/","editUrl":"http://www.memrise.com/course/1208609/gre-vocabulary/edit/","id":"1208609","subCourses":[{"dbId":"2179500","id":"4674728","name":"The Official Guide to the GRE"},{"dbId":"2179500","id":"4719046","name":"New level"}]},{"title":"Türkiye'nin Balıkları (Resimli Anlatım)","url":"http://www.memrise.com/course/1184078/turkiyenin-baliklari-resimli-anlatim/","editUrl":"http://www.memrise.com/course/1184078/turkiyenin-baliklari-resimli-anlatim/edit/","id":"1184078","subCourses":[{"dbId":"2154428","id":"4585077","name":"Göçmen Deniz Balıkları"},{"dbId":"2154428","id":"4585078","name":"Yerli Balıklar"},{"dbId":"2154428","id":"4585081","name":"Gezici Veya Uğrayıcı Balıklar"},{"dbId":"2154428","id":"4585085","name":"Tırpanagiller"},{"dbId":"2154428","id":"4585100","name":"Yassı Balıklar veya Yanyüzergiller"},{"dbId":"2154428","id":"4585086","name":"Köpekbalıkları"},{"dbId":"2154428","id":"4585088","name":"Tatlısu Balıkları"},{"dbId":"2154428","id":"4585090","name":"Talassotok Göçmen Balıklar"},{"dbId":"2154428","id":"4585091","name":"Alabalıklar"},{"dbId":"2154428","id":"4585092","name":"Yerli Tatlısu Balıkları"},{"dbId":"2154428","id":"4585094","name":"Dişli Yerli Tatlısu Balıkları"},{"dbId":"2154428","id":"4585096","name":"Balinagiller ve İki yaşayışlılar (Amfibiler)"},{"dbId":"2154428","id":"4585098","name":"Kabuklular ve Yumuşakçalar"}]}];
+  AfterLogin();
+  hideLoading();
+  */
+
   $.post('/login', { username: username, password: password }).done(function(data) {
     hideLoading();
     if(data.isSuccessful) {
@@ -58,7 +66,7 @@ function CourseSelected() {
 }
 
 function AfterSearch() {
-  if(turkishMeanings && englishMeanings) {
+  if(turkishMeanings && englishMeanings && cambridgeMeanings) {
     $('#meaningResult').hide();
     $('#meaning').html('');
     $('#searchResult').show();
@@ -79,6 +87,7 @@ function Search() {
 
   $('#english').prop('checked', '');
   $('#turkish').prop('checked', '');
+  $('#cambridge').prop('checked', '');
   $('#searchResult').hide();
   $('#meaningResult').hide();
   $('#meaning').html('');
@@ -86,11 +95,38 @@ function Search() {
   showLoading();
 
   $.get('/q/oxford/' + word).done(function(data) {
+    data.definitions.forEach(function(item, index) {
+      item.word = data.word;
+      if(item.example) {
+        item.text = data.word + ' - ' + item.definition + ' (' + item.example + ')';
+      } else {
+        item.text = data.word + ' - ' + item.definition;
+      }
+    });
     englishMeanings = data;
     AfterSearch();
   });
   $.get('/q/zargan/' + word).done(function(data) {
+    data.definitions.forEach(function(item, index) {
+      item.word = data.word;
+      if(item.example) {
+        item.text = data.word + ' - ' + item.definition + ' (' + item.example + ')';
+      } else {
+        item.text = data.word + ' - ' + item.definition;
+      }
+    });
     turkishMeanings = data;
+    AfterSearch();
+  });
+  $.get('/q/cambridge/' + word.replace(/ /g, '-')).done(function(data) {
+    data.definitions.forEach(function(item, index) {
+      if(item.example) {
+        item.text = item.word + ' (' + item.type + ',' + item.type2 + ') ' + item.definition + ' (' + item.example + ')';
+      } else {
+        item.text = item.word + ' (' + item.type + ',' + item.type2 + ') ' + item.definition;
+      }
+    });
+    cambridgeMeanings = data;
     AfterSearch();
   });
 }
@@ -101,18 +137,21 @@ function LanguageChange() {
     meanings = englishMeanings;
   } else if($('#turkish').prop('checked')) {
     meanings = turkishMeanings;
+  } else if($('#cambridge').prop('checked')) {
+    meanings = cambridgeMeanings;
   }
 
   if(meanings) {
     var options = '';
     meanings.definitions.forEach(function(item, index) {
-      if(item.example)
-        options += '<option value="' + item.id + '">' + item.id + ' - ' + item.definition + ' (' + item.example + ')' + '</option>';
-      else
-        options += '<option value="' + item.id + '">' + item.id + ' - ' + item.definition + '</option>';
+      options += '<option value="' + item.id + '">' + item.text + '</option>';
     });
     $('#meaning').html(options);
     $('#meaningResult').show();
+
+    var definition = getSelectedDefinition();
+    $('#definition').val(meanings.definitions[0].definition);
+    $('#example').val(meanings.definitions[0].example);
   }
 }
 
@@ -122,18 +161,19 @@ function getSelectedDefinition() {
     meanings = englishMeanings;
   } else if($('#turkish').prop('checked')) {
     meanings = turkishMeanings;
+  } else if($('#cambridge').prop('checked')) {
+    meanings = cambridgeMeanings;
   }
 
   var definition = null;
   var selectedDefinition = $('#meaning').val();
   meanings.definitions.forEach(function(item, index) {
     if(item.id == selectedDefinition) {
-      definition = { definition: item.definition, example: item.example };
+      definition = { word: item.word, definition: item.definition, example: item.example };
     }
   });
 
   if(definition) {
-    definition.word = meanings.word;
     if(englishMeanings && englishMeanings.word == meanings.word) {
       definition.pronunciation = englishMeanings.pronunciation;
     }
@@ -143,7 +183,7 @@ function getSelectedDefinition() {
 
 function renderWordList() {
   var html = '';
-  wordList.forEach(function(item, index) {
+  wordList.reverse().forEach(function(item, index) {
     html += '<div class="container word-line">';
     html += '<div class="row">';
     html += '<div class="col-lg-2 col-xs-12 word">' + item.word + '</div>';
@@ -158,20 +198,36 @@ function renderWordList() {
   $('#wordList').html(html);
 }
 
-function AddWord() {
+function WordSelected() {
   var definition = getSelectedDefinition();
-  var isExists = false;
-  wordList.forEach(function(item, index) {
-    if(item.word == definition.word) {
-      isExists = true;
-      item.definition = definition.definition;
-      item.example = definition.example;
+  $('#definition').val(definition.definition);
+  $('#example').val(definition.example);
+}
+
+function AddWord() {
+  var def = getSelectedDefinition();
+  var definition = {
+    word: def.word,
+    definition: $('#definition').val(),
+    example: $('#example').val()
+  };
+  if(definition.definition) {
+    var isExists = false;
+    wordList.forEach(function(item, index) {
+      if(item.word == definition.word) {
+        isExists = true;
+        item.definition = definition.definition;
+        item.example = definition.example;
+      }
+    });
+    if(!isExists) {
+      wordList.push(definition);
     }
-  });
-  if(!isExists) {
-    wordList.push(definition);
+    renderWordList();
   }
-  renderWordList();
+  else {
+    alert('Enter at least definition');
+  }
 }
 
 function AddToMemrise() {

@@ -370,11 +370,27 @@ function addBulkWords(page, data, levelId, onsuccess, onerror) {
   }, 250);
 }
 
+function addPronunciations(page, onsuccess, onerror) {
+  page.navigate('http://www.memrise.com/course/1208609/gre-vocabulary/edit/#l_4674728', function(status) {
+    if(status == 'success') {
+      page.evaluate(function() {
+        $('.level-things:eq(0) .things tr.thing:eq(0) input[type="file"]').val('http://audio.oxforddictionaries.com/en/mp3/xconvey_gb_1.mp3');
+      });
+      setTimeout(function() {
+        onsuccess();
+      } ,2000);
+    } else {
+      onerror('Error occured');
+    }
+  });
+}
+
 var flowArray = null;
 if(operation == 'courselist') {
   flowArray = [
     { func: getLoginPage, params: [page] },
     { func: submitLoginInfo, params: [page, username, password] },
+    //{ func: addPronunciations, params: [page] },
     { func: getCourseList, params: [page] },
     { func: getEditableCourses, params: function(courseList) { return [page, courseList]; } },
     { func: getDetailOfCourses, params: function(editableCourseList) { return [page, editableCourseList] } }

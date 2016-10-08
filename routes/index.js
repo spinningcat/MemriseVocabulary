@@ -9,6 +9,23 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.get('/q/cambridge/:word', function(req, res, next) {
+  var responseObj = res;
+  var childArgs = [
+    '--ssl-protocol=any',
+    path.join(__dirname, '../phantomjs/cambridge-definition.js'),
+    req.params.word
+  ]
+
+  childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
+    if(err) {
+      responseObj.send(err);
+    } else {
+      responseObj.send(JSON.parse(stdout));
+    }
+  });
+});
+
 router.get('/q/oxford/:word', function(req, res, next) {
   var responseObj = res;
   var childArgs = [
@@ -48,6 +65,7 @@ router.post('/login/', function(req, res, next) {
   var childArgs = [
     '--ssl-protocol=any',
     '--ignore-ssl-errors=yes',
+    '--web-security=false',
     path.join(__dirname, '../phantomjs/memrise-courses.js'),
     req.body.username,
     req.body.password,
