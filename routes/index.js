@@ -9,6 +9,23 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+router.get('/q/cambridge-turkish/:word', function(req, res, next) {
+  var responseObj = res;
+  var childArgs = [
+    '--ssl-protocol=any',
+    path.join(__dirname, '../phantomjs/cambridge-turkish-definition.js'),
+    req.params.word
+  ]
+
+  childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
+    if(err) {
+      responseObj.send(err);
+    } else {
+      responseObj.send(JSON.parse(stdout));
+    }
+  });
+});
+
 router.get('/q/cambridge/:word', function(req, res, next) {
   var responseObj = res;
   var childArgs = [
@@ -93,7 +110,9 @@ router.post('/addtomemrise/', function(req, res, next) {
     req.body.password,
     'addwords',
     req.body.data,
-    req.body.levelId
+    req.body.levelId,
+    req.body.courseId,
+    req.body.pronunciations
   ];
 
   childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {

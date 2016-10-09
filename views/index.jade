@@ -59,24 +59,32 @@ block content
 
   form#searchResult.form-horizontal(style='display:none;')
     div.form-group
-      div.col-md-2
-        label Language
-      div.col-md-2.col-xs-4
-        div.radio
-          label
-            input#english(type="radio", name='language', value='english', onchange="LanguageChange()")
-            | Oxford
-      div.col-md-2.col-xs-4
-        div.radio
-          label
-            input#cambridge(type="radio", name='language', value='cambridge', onchange="LanguageChange()")
-            | Cambridge
-      div.col-md-2.col-xs-4
-        div.radio
-          label
-            input#turkish(type="radio", name='language', value='turkish', onchange="LanguageChange()")
-            | Turkish
-      div.col-md-6
+      div.row
+        div.col-md-2
+          label English
+        div.col-md-2.col-xs-6
+          div.radio
+            label
+              input#english(type="radio", name='language', value='english', onchange="LanguageChange()")
+              | Oxford
+        div.col-md-2.col-xs-6
+          div.radio
+            label
+              input#cambridge(type="radio", name='language', value='cambridge', onchange="LanguageChange()")
+              | Cambridge
+      div.row
+        div.col-md-2
+          label Turkish
+        div.col-md-2.col-xs-6
+          div.radio
+            label
+              input#cambridge-turkish(type="radio", name='language', value='cambridge-turkish', onchange="LanguageChange()")
+              | Cambridge
+        div.col-md-2.col-xs-6
+          div.radio
+            label
+              input#turkish(type="radio", name='language', value='turkish', onchange="LanguageChange()")
+              | Zargan
     div#meaningResult.form-group(style="display:none;")
       div.row
         div.col-md-2

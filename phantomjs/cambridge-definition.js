@@ -7,7 +7,10 @@ page.open("http://dictionary.cambridge.org/dictionary/english/" + word, function
     if ( status === "success" ) {
       if(page.injectJs('../public/javascripts/jquery.js')) {
         var res = page.evaluate(function() {
-          var result = {definitions:[]};
+          var result = {
+            definitions:[],
+            pronunciation: $('.sound.audio_play_button.us').first().attr('data-src-mp3').trim()
+          };
           var defId = 0;
 
           var sectionScrapper = function(index, item) {

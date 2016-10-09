@@ -7,7 +7,7 @@ function error(message) {
   phantom.exit();
 }
 
-if(system.args.length != 4 && system.args.length != 6) {
+if(system.args.length != 4 && system.args.length != 8) {
   error('parameters are invalid');
 }
 
@@ -16,13 +16,17 @@ var password = system.args[2];
 var operation = system.args[3];
 var data = null;
 var levelId = null;
+var courseId = null;
+var pronunciations = null;
 
 if(operation != 'courselist' && operation != 'addwords') {
   error('operation is invalid');
 } else if(operation == 'addwords') {
-  if(system.args.length == 6) {
+  if(system.args.length == 8) {
     data = system.args[4];
     levelId = system.args[5];
+    courseId = system.args[6];
+    pronunciations = system.args[7];
   } else {
     error('parameters are invalid to add words');
   }
@@ -370,15 +374,64 @@ function addBulkWords(page, data, levelId, onsuccess, onerror) {
   }, 250);
 }
 
+// page.uploadFile('input[name=files]', '/path/to/file.ext');
+
 function addPronunciations(page, onsuccess, onerror) {
-  page.navigate('http://www.memrise.com/course/1208609/gre-vocabulary/edit/#l_4674728', function(status) {
+  page.navigate('http://www.memrise.com/course/' + courseId + '/course/edit/levels/', function(status) {
     if(status == 'success') {
-      page.evaluate(function() {
-        $('.level-things:eq(0) .things tr.thing:eq(0) input[type="file"]').val('http://audio.oxforddictionaries.com/en/mp3/xconvey_gb_1.mp3');
-      });
-      setTimeout(function() {
-        onsuccess();
-      } ,2000);
+      page.evaluate(function(levelId) {
+        $('#l_' + levelId).find('a[data-role="level-toggle"]').click();
+        var interval = setInterval(function() {
+          var wordRows = $('#l_' + levelId).find('.table-container .things .thing');
+          if(wordRows.length > 0) {
+            clearInterval(interval);
+            wordRows.each(function(index, item) {
+              var word = $(item).find('td.cell.text.column[data-key="1"] .text').text().trim().replace(/ /g, '_');
+              if($(item).find('button.btn.btn-mini.dropdown-toggle').text().trim() == 'no audio file') {
+                $(item).find('.add_thing_file[type="file"]').attr('id', 'upload_' + word);
+              }
+            });
+
+            if(!window.MemriseVocabulary) {
+              window.MemriseVocabulary = {};
+            }
+            window.MemriseVocabulary.UploadIDsSet = true;
+          }
+        }, 250);
+      }, levelId);
+
+      var timeout = 10000; // 10 sec
+      var startTime = new Date().getTime();
+      var interval = setInterval(function() {
+        var isTimedOut = new Date().getTime() - startTime >= timeout;
+        var isComplete = page.evaluate(function() {
+          return window.MemriseVocabulary && window.MemriseVocabulary.UploadIDsSet;
+        });
+
+        if(isComplete) {
+          clearInterval(interval);
+
+          var len = page.evaluate(function(levelId) {
+            return $('#l_' + levelId).find('.table-container .things .thing').length;
+          }, levelId);
+
+          var prs = JSON.parse(decodeURIComponent(pronunciations));
+          prs.forEach(function(item, index) {
+            page.uploadFile('input#upload_' + item.word.replace(/ /g, '_') + '[type="file"]', item.pronunciation);
+          });
+
+          interval = setInterval(function() {
+            clearInterval(interval);
+            onsuccess();
+          }, 5000);
+        } else if(isTimedOut) {
+          clearInterval(interval);
+          var len = page.evaluate(function(levelId) {
+            return $('#l_' + levelId).find('.table-container .things .thing').length;
+          }, levelId);
+          onerror('Timeout is occured while uploading pronunciations ' + len);
+        }
+      }, 250);
     } else {
       onerror('Error occured');
     }
@@ -390,7 +443,6 @@ if(operation == 'courselist') {
   flowArray = [
     { func: getLoginPage, params: [page] },
     { func: submitLoginInfo, params: [page, username, password] },
-    //{ func: addPronunciations, params: [page] },
     { func: getCourseList, params: [page] },
     { func: getEditableCourses, params: function(courseList) { return [page, courseList]; } },
     { func: getDetailOfCourses, params: function(editableCourseList) { return [page, editableCourseList] } }
@@ -400,6 +452,7 @@ if(operation == 'courselist') {
     { func: getLoginPage, params: [page] },
     { func: submitLoginInfo, params: [page, username, password] },
     { func: addBulkWords, params: [page, data, levelId] },
+    //{ func: addPronunciations, params: [page] }
   ];
 }
 
