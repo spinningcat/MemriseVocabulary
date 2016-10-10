@@ -52,7 +52,7 @@ block content
       div.col-md-2
         label(for="word") Word
       div.col-md-8
-        input#word.form-control(type="text")
+        input#word.form-control(type="text", onkeypress="if(event.keyCode == 13) { Search(); }")
       div.col-md-2
         div.button-group
           button.btn.btn-primary.btn-block(type="button", value="Search", onclick="Search();") Search
@@ -103,6 +103,12 @@ block content
           label(for="example") Example
         div.col-md-8
           input#example.form-control(type="text")
+        div.col-md-2
+      div.row
+        div.col-md-2
+          label(for="sound") Sound
+        div.col-md-8
+          input#sound.form-control(type="text", readonly="readonly")
         div.col-md-2
           button.btn.btn-primary.btn-block(type="button", value="AddWord", onclick="AddWord();") Add
 

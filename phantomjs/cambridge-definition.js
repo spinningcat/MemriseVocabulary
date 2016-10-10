@@ -7,9 +7,11 @@ page.open("http://dictionary.cambridge.org/dictionary/english/" + word, function
     if ( status === "success" ) {
       if(page.injectJs('../public/javascripts/jquery.js')) {
         var res = page.evaluate(function() {
+          var pr = $('.sound.audio_play_button.us').first().attr('data-src-mp3');
+          if(pr) pr = pr.trim();
           var result = {
             definitions:[],
-            pronunciation: $('.sound.audio_play_button.us').first().attr('data-src-mp3').trim()
+            pronunciation: pr
           };
           var defId = 0;
 

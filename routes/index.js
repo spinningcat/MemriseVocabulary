@@ -3,6 +3,8 @@ var childProcess = require('child_process')
 var phantomjs = require('phantomjs')
 var express = require('express');
 var router = express.Router();
+var fs = require('fs');
+var http = require('http');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -102,6 +104,7 @@ router.post('/login/', function(req, res, next) {
 
 router.post('/addtomemrise/', function(req, res, next) {
   var responseObj = res;
+  var soundPath = path.join(__dirname, '../sounds');
   var childArgs = [
     '--ssl-protocol=any',
     '--ignore-ssl-errors=yes',
@@ -112,8 +115,27 @@ router.post('/addtomemrise/', function(req, res, next) {
     req.body.data,
     req.body.levelId,
     req.body.courseId,
-    req.body.pronunciations
+    req.body.pronunciations,
+    soundPath
   ];
+
+  fs.readdirSync(soundPath).forEach(function(file,index){
+      fs.unlinkSync(soundPath + "/" + file);
+    });
+  fs.rmdirSync(soundPath);
+  fs.mkdirSync(soundPath);
+  var prs = JSON.parse(decodeURIComponent(req.body.pronunciations));
+  prs.forEach(function(item, index) {
+    console.log(item.word);
+    console.log(item.pronunciation);
+    if(item.pronunciation && item.pronunciation.length > 0) {
+      var filePath = path.join(soundPath, '/' + item.word + '.mp3');
+      var file = fs.createWriteStream(filePath);
+      var request = http.get(item.pronunciation, function(response) {
+        response.pipe(file);
+      });
+    }
+  });
 
   childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
     if(err) {

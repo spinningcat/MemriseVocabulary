@@ -7,7 +7,7 @@ function error(message) {
   phantom.exit();
 }
 
-if(system.args.length != 4 && system.args.length != 8) {
+if(system.args.length != 4 && system.args.length != 9) {
   error('parameters are invalid');
 }
 
@@ -18,15 +18,17 @@ var data = null;
 var levelId = null;
 var courseId = null;
 var pronunciations = null;
+var soundsPath = null;
 
 if(operation != 'courselist' && operation != 'addwords') {
   error('operation is invalid');
 } else if(operation == 'addwords') {
-  if(system.args.length == 8) {
+  if(system.args.length == 9) {
     data = system.args[4];
     levelId = system.args[5];
     courseId = system.args[6];
     pronunciations = system.args[7];
+    soundsPath = system.args[8];
   } else {
     error('parameters are invalid to add words');
   }
@@ -374,8 +376,6 @@ function addBulkWords(page, data, levelId, onsuccess, onerror) {
   }, 250);
 }
 
-// page.uploadFile('input[name=files]', '/path/to/file.ext');
-
 function addPronunciations(page, onsuccess, onerror) {
   page.navigate('http://www.memrise.com/course/' + courseId + '/course/edit/levels/', function(status) {
     if(status == 'success') {
@@ -410,14 +410,11 @@ function addPronunciations(page, onsuccess, onerror) {
 
         if(isComplete) {
           clearInterval(interval);
-
-          var len = page.evaluate(function(levelId) {
-            return $('#l_' + levelId).find('.table-container .things .thing').length;
-          }, levelId);
-
           var prs = JSON.parse(decodeURIComponent(pronunciations));
           prs.forEach(function(item, index) {
-            page.uploadFile('input#upload_' + item.word.replace(/ /g, '_') + '[type="file"]', item.pronunciation);
+            if(item.pronunciation && item.pronunciation.length > 0) {
+              page.uploadFile('input#upload_' + item.word.replace(/ /g, '_') + '[type="file"]', soundsPath + '/' + item.word + '.mp3');
+            }
           });
 
           interval = setInterval(function() {
@@ -426,10 +423,7 @@ function addPronunciations(page, onsuccess, onerror) {
           }, 5000);
         } else if(isTimedOut) {
           clearInterval(interval);
-          var len = page.evaluate(function(levelId) {
-            return $('#l_' + levelId).find('.table-container .things .thing').length;
-          }, levelId);
-          onerror('Timeout is occured while uploading pronunciations ' + len);
+          onerror('Timeout is occured while uploading pronunciations');
         }
       }, 250);
     } else {
@@ -452,7 +446,7 @@ if(operation == 'courselist') {
     { func: getLoginPage, params: [page] },
     { func: submitLoginInfo, params: [page, username, password] },
     { func: addBulkWords, params: [page, data, levelId] },
-    //{ func: addPronunciations, params: [page] }
+    { func: addPronunciations, params: [page] }
   ];
 }
 
