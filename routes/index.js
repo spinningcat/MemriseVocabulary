@@ -105,6 +105,8 @@ router.post('/login/', function(req, res, next) {
 router.post('/addtomemrise/', function(req, res, next) {
   var responseObj = res;
   var soundPath = path.join(__dirname, '../sounds');
+  global.requestCounter++;
+  var requestFolder = soundPath + '/' + new Date().getTime() + '_' + global.requestCounter;
   var childArgs = [
     '--ssl-protocol=any',
     '--ignore-ssl-errors=yes',
@@ -116,20 +118,29 @@ router.post('/addtomemrise/', function(req, res, next) {
     req.body.levelId,
     req.body.courseId,
     req.body.pronunciations,
-    soundPath
+    requestFolder
   ];
 
-  fs.readdirSync(soundPath).forEach(function(file,index){
-      fs.unlinkSync(soundPath + "/" + file);
-    });
-  fs.rmdirSync(soundPath);
-  fs.mkdirSync(soundPath);
+
+
+/*
+  if(fs.existsSync(soundPath)) {
+    fs.readdirSync(soundPath).forEach(function(file,index){
+        fs.unlinkSync(soundPath + "/" + file);
+      });
+    fs.rmdirSync(soundPath);
+  }
+*/
+
+  if(!fs.existsSync(soundPath)) {
+    fs.mkdirSync(soundPath);
+  }
+  fs.mkdirSync(requestFolder);
+
   var prs = JSON.parse(decodeURIComponent(req.body.pronunciations));
   prs.forEach(function(item, index) {
-    console.log(item.word);
-    console.log(item.pronunciation);
     if(item.pronunciation && item.pronunciation.length > 0) {
-      var filePath = path.join(soundPath, '/' + item.word + '.mp3');
+      var filePath = path.join(requestFolder, '/' + item.word + '.mp3');
       var file = fs.createWriteStream(filePath);
       var request = http.get(item.pronunciation, function(response) {
         response.pipe(file);
@@ -138,6 +149,12 @@ router.post('/addtomemrise/', function(req, res, next) {
   });
 
   childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
+    if(fs.existsSync(requestFolder)) {
+      fs.readdirSync(requestFolder).forEach(function(file,index){
+          fs.unlinkSync(requestFolder + "/" + file);
+        });
+      fs.rmdirSync(requestFolder);
+    }
     if(err) {
       console.log(err);
       responseObj.send(err);
