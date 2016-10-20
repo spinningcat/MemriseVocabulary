@@ -64,19 +64,19 @@ block content
       b Word list
     div.panel-body.word-definition-panel(data-bind="foreach: { data: dictionary.wordList, as: 'wordInfo' }")
       div.row.word-definition-row(data-bind="attr: { for: viewModel.selectedWordID($index()) }")
-        div.col-xs-1
+        div.col-md-1.col-xs-2
           input(type="radio", name="selectedWord", data-bind="checked: $parent.dictionary.selectedWordIndex, value: $index, attr: { id: viewModel.selectedWordID($index()) }")
-        div.col-xs-2
+        div.col-md-2.col-xs-10
           label(data-bind="text: wordInfo.word, attr: { for: viewModel.selectedWordID($index()) }") &nbsp;
-        div.col-xs-7(data-bind="foreach : { data: viewModel.dictionary.sources, as: 'source' }")
+        div.col-md-7.col-xs-10(data-bind="foreach : { data: viewModel.dictionary.sources, as: 'source' }")
           div.source-div(data-bind="style: { width: viewModel.GetSourcePercentage() }")
             div(style="width:80%", data-bind="css: viewModel.GetColorCode(wordInfo.definitions[source.name()])") &nbsp;
-        div.col-xs-1(data-bind="css: viewModel.GetDefinitionColorCode(wordInfo.selectedDefinition)") &nbsp;
+        div.col-md-1.col-xs-2(data-bind="css: viewModel.GetDefinitionColorCode(wordInfo.selectedDefinition)") &nbsp;
 
-  div#wordDefinitionPanel.panel.panel-default(data-bind="if: viewModel.dictionary.selectedWordIndex() >= 0")
+  div#wordDefinitionPanel.panel.panel-default
     div.panel-heading
       b Set the meaning of the word
-    div.panel-body
+    div.panel-body(data-bind="if: viewModel.dictionary.selectedWordIndex() >= 0")
       div.row
         div.col-md-2
           label Dictionary
@@ -89,26 +89,28 @@ block content
         div.col-md-10(data-bind="if: viewModel.dictionary.wordList()[viewModel.dictionary.selectedWordIndex()].selectedDictionary() != ' '")
           select#definitionList.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinitionIndex, foreach: viewModel.GetDefinitionOptions()")
             option(data-bind="value: $index, text: text")
+        div.col-md-10(data-bind="if: viewModel.dictionary.wordList()[viewModel.dictionary.selectedWordIndex()].selectedDictionary() == ' '")
+          select.form-control
       div.row
         div.col-md-2
           label Selected Definition
-        div.col-md-8.col-xs-9
+        div.col-md-8
           input#definition.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.definition, disable: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.isDefinitionSet")
-        div.col-md-2.col-xs-3
+        div.col-md-2
           button.btn.btn-primary.btn-block(type="button", data-bind="click: SetDefinition") Set
       div.row
         div.col-md-2
           label Example
-        div.col-md-8.col-xs-9
+        div.col-md-8
           input#example.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.example, disable: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.isExampleSet")
-        div.col-md-2.col-xs-3
+        div.col-md-2
           button.btn.btn-primary.btn-block(type="buton", data-bind="click: SetExample") Set
       div.row
         div.col-md-2
           label Pronunciation
-        div.col-md-8.col-xs-9
+        div.col-md-8
           input#pronunciation.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.pronunciation, disable: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.isPronunciationSet")
-        div.col-md-2.col-xs-3
+        div.col-md-2
           button.btn.btn-primary.btn-block(type="button", data-bind="click: SetPronunciation") Set
 
   div#wordListPanel.panel.panel-default

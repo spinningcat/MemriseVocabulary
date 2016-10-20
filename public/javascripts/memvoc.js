@@ -34,7 +34,7 @@ var model = {
     sources: [
       {
         name: 'oxford-en',
-        text: 'Oxford Englisg',
+        text: 'Oxford English',
         fetch: function(word) {
           var _this = this;
           return new Promise(function(fulfill, reject) {
