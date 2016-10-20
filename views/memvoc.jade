@@ -1,0 +1,132 @@
+extend layout
+
+block head
+  script(src='/javascripts/memvoc.js')
+
+block content
+
+  h2 Memrise Vocabulary
+
+  div#loginPanel.panel.panel-default(data-bind="visible: !userInfo.isLoggedIn()")
+    div.panel-heading
+      b Enter your memrise username and password
+    div.panel-body
+      div.row
+        div.col-md-2
+          label(for="username") Username
+        div.col-md-8
+          input#username.form-control(type="text", data-bind="value: userInfo.username")
+        div.col-md-2
+      div.row
+        div.col-md-2
+          label(for="password") Password
+        div.col-md-8
+          input#password.form-control(type="password", data-bind="value: userInfo.password")
+        div.col-md-2
+          button.btn.btn-primary.btn-block(type="button", value="Login", onclick="Login();") Login
+
+  div#courseListPanel.panel.panel-default(data-bind="visible: userInfo.isLoggedIn")
+    div.panel-heading
+      b Select course to add the words to
+    div.panel-body
+      div.row
+        div.col-md-2
+          label Course
+        div.col-md-4
+          select#course.form-control(data-bind="value: dictionary.selectedCourse, foreach: userInfo.courseList")
+            option(data-bind="value: id, text: name")
+        div.col-md-4
+          select#level.form-control(data-bind="value: dictionary.selectedLevel, foreach: userInfo.levelList")
+            option(data-bind="value: id, text: name")
+        div.col-md-2
+      div.row
+        div.col-md-2
+          label(for="format") Format
+        div.col-md-8
+          input#format.form-control(type="text", data-bind="value: dictionary.format")
+        div.col-md-2
+
+  div#wordAdditionPanel.panel.panel-default
+    div.panel-heading
+      b Add words to list
+    div.panel-body
+      div.row
+        div.col-md-2
+          label Word
+        div.col-md-8
+          input#word.form-control(type="text", data-bind="value: dictionary.wordToAdd, event: { keypress: WordKeyPress }")
+        div.col-md-2
+          button.btn.btn-primary.btn-block(type="button", value="Add", data-bind="click: AddWord") Add
+
+
+  div#wordDefinitionMonitorPanel.panel.panel-default
+    div.panel-heading
+      b Word list
+    div.panel-body.word-definition-panel(data-bind="foreach: { data: dictionary.wordList, as: 'wordInfo' }")
+      div.row.word-definition-row(data-bind="attr: { for: viewModel.selectedWordID($index()) }")
+        div.col-xs-1
+          input(type="radio", name="selectedWord", data-bind="checked: $parent.dictionary.selectedWordIndex, value: $index, attr: { id: viewModel.selectedWordID($index()) }")
+        div.col-xs-2
+          label(data-bind="text: wordInfo.word, attr: { for: viewModel.selectedWordID($index()) }") &nbsp;
+        div.col-xs-7(data-bind="foreach : { data: viewModel.dictionary.sources, as: 'source' }")
+          div.source-div(data-bind="style: { width: viewModel.GetSourcePercentage() }")
+            div(style="width:80%", data-bind="css: viewModel.GetColorCode(wordInfo.definitions[source.name()])") &nbsp;
+        div.col-xs-1(data-bind="css: viewModel.GetDefinitionColorCode(wordInfo.selectedDefinition)") &nbsp;
+
+  div#wordDefinitionPanel.panel.panel-default(data-bind="if: viewModel.dictionary.selectedWordIndex() >= 0")
+    div.panel-heading
+      b Set the meaning of the word
+    div.panel-body
+      div.row
+        div.col-md-2
+          label Dictionary
+        div.col-md-10
+          select#dictionary.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDictionary, foreach: viewModel.GetDictionaryOptions()")
+            option(data-bind="value: name, text: text")
+      div.row
+        div.col-md-2
+          label Definitions
+        div.col-md-10(data-bind="if: viewModel.dictionary.wordList()[viewModel.dictionary.selectedWordIndex()].selectedDictionary() != ' '")
+          select#definitionList.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinitionIndex, foreach: viewModel.GetDefinitionOptions()")
+            option(data-bind="value: $index, text: text")
+      div.row
+        div.col-md-2
+          label Selected Definition
+        div.col-md-8.col-xs-9
+          input#definition.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.definition, disable: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.isDefinitionSet")
+        div.col-md-2.col-xs-3
+          button.btn.btn-primary.btn-block(type="button", data-bind="click: SetDefinition") Set
+      div.row
+        div.col-md-2
+          label Example
+        div.col-md-8.col-xs-9
+          input#example.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.example, disable: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.isExampleSet")
+        div.col-md-2.col-xs-3
+          button.btn.btn-primary.btn-block(type="buton", data-bind="click: SetExample") Set
+      div.row
+        div.col-md-2
+          label Pronunciation
+        div.col-md-8.col-xs-9
+          input#pronunciation.form-control(data-bind="value: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.pronunciation, disable: dictionary.wordList()[dictionary.selectedWordIndex()].selectedDefinition.isPronunciationSet")
+        div.col-md-2.col-xs-3
+          button.btn.btn-primary.btn-block(type="button", data-bind="click: SetPronunciation") Set
+
+  div#wordListPanel.panel.panel-default
+    div.panel-heading
+      b Word list to be added to memrise
+    div.panel-body
+      div.row
+        div.col-md-12.word-list(data-bind="foreach: viewModel.GetWordList()")
+          div.container.word-line
+            div.row
+              div.col-lg-2.col-xs-12.word(data-bind="text: word")
+              div.col-lg-10.col-xs-12(data-bind="text: definition")
+            div.row
+              div.col-lg-2.hidden-xs
+              div.col-lg-10.col-xs-12.example(data-bind="text: example")
+            div.row
+              div.col-lg-2.hidden-xs
+              div.col-lg-10.col-xs-12.example(data-bind="text: pronunciation")
+      div.row
+        div.col-md-12
+          button.btn.btn-primary.btn-block(type="button", data-bind="click: AddToMemrise") Add to memrise

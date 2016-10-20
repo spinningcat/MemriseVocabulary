@@ -34,7 +34,7 @@ input[type="radio"] {
 
 .word-list {
   height: 15em;
-  overflow-y: scroll;
+  overflow-y: autod ;
 }
 
 .word-line {
@@ -49,4 +49,36 @@ input[type="radio"] {
 
 .word-list .example {
   font-style: italic;
+}
+
+
+
+
+.word-definition-panel {
+  min-height: 200px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.word-definition-row {
+  border-bottom: #ddd 1px solid;
+  margin-bottom: 3px;
+  padding-bottom: 3px;
+}
+
+.source-div {
+  position: relative;
+  float:left;
+}
+
+.red {
+  background-color: red;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.green {
+  background-color: green;
 }

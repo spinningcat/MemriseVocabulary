@@ -8,7 +8,11 @@ var http = require('http');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'memvoc' });
+});
+
+router.get('/memvoc', function(req, res, next) {
+  res.render('memvoc', { title: 'memvoc' });
 });
 
 router.get('/q/cambridge-turkish/:word', function(req, res, next) {

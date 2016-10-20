@@ -8,6 +8,7 @@
   "dependencies": {
     "jquery": "^3.1.1",
     "react": "^15.3.2",
-    "bootstrap": "^3.3.7"
+    "bootstrap": "^3.3.7",
+    "dustjs": "^0.3.0"
   }
 }
