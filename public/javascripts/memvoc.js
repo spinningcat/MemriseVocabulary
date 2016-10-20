@@ -124,9 +124,36 @@ var model = {
   $(document).ready(function(){
     viewModel = ko.mapping.fromJS(model);
 
+    viewModel.AddToMemrise = function() {
+      var result = [];
+      var wordList = viewModel.dictionary.wordList();
+      for(var i = 0; i < wordList.length; i++) {
+        var def = wordList[i].selectedDefinition;
+        if(def.isDefinitionSet() && def.isExampleSet() && def.isPronunciationSet()) {
+          result.push({
+            word: wordList[i].word(),
+            definition: def.definition(),
+            example: def.example(),
+            pronunciation: def.pronunciation()
+          });
+        } else {
+          alert('Definition, example and/or pronunciation of the word "' + wordList[i].word() + '" are/is not set');
+          return;
+        }
+      }
+
+      console.log(result);
+    };
+
+    viewModel.WordItemClicked = function(data, event) {
+      if(event.currentTarget && event.currentTarget.attributes && event.currentTarget.attributes['for'] && event.currentTarget.attributes['for'].value) {
+        viewModel.dictionary.selectedWordIndex(parseInt(event.currentTarget.attributes['for'].value));
+      }
+    };
+
     viewModel.selectedWordID = function(index) {
       return 'selectedWord_' + index;
-    }
+    };
     viewModel.GetWordList = function() {
       var result = [];
       var wordList = viewModel.dictionary.wordList();

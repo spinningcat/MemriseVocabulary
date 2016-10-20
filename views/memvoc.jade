@@ -63,11 +63,11 @@ block content
     div.panel-heading
       b Word list
     div.panel-body.word-definition-panel(data-bind="foreach: { data: dictionary.wordList, as: 'wordInfo' }")
-      div.row.word-definition-row(data-bind="attr: { for: viewModel.selectedWordID($index()) }")
-        div.col-md-1.col-xs-2
+      div.row.word-definition-row(data-bind="attr: { for: $index }, click: $parent.WordItemClicked")
+        div.col-md-1.col-xs-1
           input(type="radio", name="selectedWord", data-bind="checked: $parent.dictionary.selectedWordIndex, value: $index, attr: { id: viewModel.selectedWordID($index()) }")
-        div.col-md-2.col-xs-10
-          label(data-bind="text: wordInfo.word, attr: { for: viewModel.selectedWordID($index()) }") &nbsp;
+        div.col-md-2.col-xs-11
+          label(data-bind="text: wordInfo.word") &nbsp;
         div.col-md-7.col-xs-10(data-bind="foreach : { data: viewModel.dictionary.sources, as: 'source' }")
           div.source-div(data-bind="style: { width: viewModel.GetSourcePercentage() }")
             div(style="width:80%", data-bind="css: viewModel.GetColorCode(wordInfo.definitions[source.name()])") &nbsp;
