@@ -2,27 +2,10 @@ var model = {
   userInfo: {
     username: '',
     password: '',
-    courseList: [
-      {
-        id: '',
-        name: 'Select'
-      },
-      {
-        id: 1,
-        name: 'Course1'
-      }
-    ],
-    levelList: [
-      {
-        id: '',
-        name: 'Select'
-      },
-      {
-        id: 1,
-        name: 'Level1'
-      }
-    ],
-    isLoggedIn: false
+    courseList: [],
+    levelList: [],
+    isLoggedIn: false,
+    isInLoginProcess: false
   },
   dictionary: {
     wordToAdd: '',
@@ -121,10 +104,60 @@ var model = {
 
 (function(model) {
 
+  function showLoading() {
+    $('#loadingModal').modal('show');
+  }
+
+  function hideLoading() {
+    $('#loadingModal').modal('hide');
+  }
+
   $(document).ready(function(){
     viewModel = ko.mapping.fromJS(model);
 
+
+    viewModel.WordListCount = function() {
+      var setCount = 0;
+      viewModel.dictionary.wordList().forEach(function(item, index) {
+        if(item.selectedDefinition.isDefinitionSet() && item.selectedDefinition.isExampleSet() && item.selectedDefinition.isPronunciationSet()) {
+          setCount++;
+        }
+      });
+      return setCount + '/' + viewModel.dictionary.wordList().length
+    }
+    viewModel.Login = function() {
+      if(!viewModel.userInfo.username() || !viewModel.userInfo.password()) {
+        alert('Username and password is required');
+        return;
+      }
+      viewModel.userInfo.isInLoginProcess(true);
+
+      setTimeout(function () {
+        viewModel.userInfo.isInLoginProcess(false);
+      }, 120000);
+
+      $.post('/newlogin', { username: viewModel.userInfo.username(), password: viewModel.userInfo.password() }).done(function(data) {
+        viewModel.userInfo.isInLoginProcess(false);
+        if(data.isSuccessful) {
+          viewModel.userInfo.isLoggedIn(true);
+          viewModel.userInfo.courseList(data.data);
+        } else {
+          alert(data.error);
+        }
+      });
+    }
     viewModel.AddToMemrise = function() {
+      if(!viewModel.dictionary.selectedCourse() || viewModel.dictionary.selectedCourse() == ' ') {
+        alert('Select the course');
+        return;
+      }
+      if(viewModel.dictionary.wordList().length == 0) {
+        alert('Word list is empty');
+        return;
+      }
+
+      showLoading();
+
       var result = [];
       var wordList = viewModel.dictionary.wordList();
       for(var i = 0; i < wordList.length; i++) {
@@ -142,8 +175,29 @@ var model = {
         }
       }
 
-      console.log(result);
+      setTimeout(function () {
+        hideLoading();
+      }, 120000);
+
+      $.post('/addToDB', { username: viewModel.userInfo.username(), password: viewModel.userInfo.password(), courseId: viewModel.dictionary.selectedCourse(), format: viewModel.dictionary.format(), wordList: encodeURIComponent(JSON.stringify(result)) }).done(function(result) {
+        hideLoading();
+        if(result.isSuccessful) {
+          viewModel.dictionary.selectedWordIndex(-1);
+          viewModel.dictionary.wordList.removeAll();
+        } else {
+          alert(result.error);
+        }
+      });
     };
+
+    viewModel.GetCourseList = function() {
+      var result = [];
+      result.push(ko.mapping.fromJS({ id: ' ', title: 'Please Select' }));
+      viewModel.userInfo.courseList().forEach(function(item, index) {
+        result.push(item);
+      });
+      return result;
+    }
 
     viewModel.WordItemClicked = function(data, event) {
       if(event.currentTarget && event.currentTarget.attributes && event.currentTarget.attributes['for'] && event.currentTarget.attributes['for'].value) {
@@ -269,7 +323,7 @@ var model = {
           var definition = wordViewModel.definitions[wordViewModel.selectedDictionary()]().definitions[newValue];
           wordViewModel.selectedDefinition.word(definition.word);
           if(!wordViewModel.selectedDefinition.isDefinitionSet()) {
-            wordViewModel.selectedDefinition.definition(definition.definition);
+            wordViewModel.selectedDefinition.definition(definition.definition.toLowerCase());
           }
           if(!wordViewModel.selectedDefinition.isExampleSet()) {
             wordViewModel.selectedDefinition.example(definition.example);

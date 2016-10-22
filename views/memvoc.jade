@@ -23,7 +23,7 @@ block content
         div.col-md-8
           input#password.form-control(type="password", data-bind="value: userInfo.password")
         div.col-md-2
-          button.btn.btn-primary.btn-block(type="button", value="Login", onclick="Login();") Login
+          button.btn.btn-primary.btn-block(type="button", data-bind="click: Login, enable: !userInfo.isInLoginProcess()") Login
 
   div#courseListPanel.panel.panel-default(data-bind="visible: userInfo.isLoggedIn")
     div.panel-heading
@@ -32,12 +32,9 @@ block content
       div.row
         div.col-md-2
           label Course
-        div.col-md-4
-          select#course.form-control(data-bind="value: dictionary.selectedCourse, foreach: userInfo.courseList")
-            option(data-bind="value: id, text: name")
-        div.col-md-4
-          select#level.form-control(data-bind="value: dictionary.selectedLevel, foreach: userInfo.levelList")
-            option(data-bind="value: id, text: name")
+        div.col-md-8
+          select#course.form-control(data-bind="value: dictionary.selectedCourse, foreach: viewModel.GetCourseList()")
+            option(data-bind="value: id, text: title")
         div.col-md-2
       div.row
         div.col-md-2
@@ -62,6 +59,7 @@ block content
   div#wordDefinitionMonitorPanel.panel.panel-default
     div.panel-heading
       b Word list
+      b(style="float:right", data-bind="text:viewModel.WordListCount()")
     div.panel-body.word-definition-panel(data-bind="foreach: { data: dictionary.wordList, as: 'wordInfo' }")
       div.row.word-definition-row(data-bind="attr: { for: $index }, click: $parent.WordItemClicked")
         div.col-md-1.col-xs-1

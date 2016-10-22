@@ -33,11 +33,12 @@ input[type="radio"] {
 
 .word-list {
   height: 15em;
-  overflow-y: autod ;
+  overflow-y: auto ;
 }
 
 .word-line {
   margin-bottom: 1em;
+  width:auto;
 }
 
 .word-list .word {

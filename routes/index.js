@@ -5,6 +5,8 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 var http = require('http');
+var mongodb = require('../db/mongodb');
+var tasks = require('../db/tasks');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -103,6 +105,39 @@ router.post('/login/', function(req, res, next) {
       console.log(stdout);
       responseObj.send(JSON.parse(stdout));
     }
+  });
+});
+
+router.post('/newlogin/', function(req, res, next) {
+  var responseObj = res;
+  var childArgs = [
+    path.join(__dirname, '../phantomjs/memrise-courses.js'),
+    req.body.username,
+    req.body.password,
+    'justcourselist'
+  ];
+
+  childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
+    if(err) {
+      console.log(err);
+      responseObj.send(err);
+    } else {
+      console.log(stdout);
+      responseObj.send(JSON.parse(stdout));
+    }
+  });
+});
+
+router.post('/addToDB', function(req, res, next) {
+  var courseId = req.body.courseId;
+  var format = req.body.format;
+  var wordList = JSON.parse(decodeURIComponent(req.body.wordList));
+
+  mongodb.insertWordList(wordList, courseId, format, function(result) {
+    if(result.isSuccessful) {
+      tasks.wordListTask(req.body.username, req.body.password, courseId);
+    }
+    res.send(result);
   });
 });
 

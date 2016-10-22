@@ -7,7 +7,7 @@ function error(message) {
   phantom.exit();
 }
 
-if(system.args.length != 4 && system.args.length != 9) {
+if(system.args.length < 4) {
   error('parameters are invalid');
 }
 
@@ -20,7 +20,7 @@ var courseId = null;
 var pronunciations = null;
 var soundsPath = null;
 
-if(operation != 'courselist' && operation != 'addwords') {
+if(operation != 'courselist' && operation != 'addwords' && operation != 'justcourselist' && operation != 'addlevelandwords') {
   error('operation is invalid');
 } else if(operation == 'addwords') {
   if(system.args.length == 9) {
@@ -31,6 +31,15 @@ if(operation != 'courselist' && operation != 'addwords') {
     soundsPath = system.args[8];
   } else {
     error('parameters are invalid to add words');
+  }
+} else if(operation == 'addlevelandwords') {
+  if(system.args.length == 8) {
+    data = system.args[4];
+    courseId = system.args[5];
+    pronunciations = system.args[6];
+    soundsPath = system.args[7];
+  } else {
+    error('parameters are invalid to add level and words');
   }
 }
 
@@ -226,10 +235,11 @@ function getCourseList(page, onsuccess, onerror) {
 
     var scroller = new WindowScroller();
     scroller.start(function() {
-      var coursesContainer = $('.course-cards-component.js-course-cards-component').find('.course-card-container.js-course-card-container').find('.card-main-container .wrapper > .detail > .title > a');
+      var coursesContainer = $('.course-cards-component.js-course-cards-component').find('.course-card-container.js-course-card-container');
       var courses = [];
       coursesContainer.each(function(index, item) {
-        courses.push({ title: $(item).text().trim(), url: $(item).attr('href') });
+        var element = $(item).find('.card-main-container .wrapper > .detail > .title > a');
+        courses.push({ id: $(item).attr('id').replace('course-', ''), title: element.text().trim(), url: element.attr('href') });
       });
       if(!window.MemriseVocabulary) {
         window.MemriseVocabulary = {};
@@ -281,7 +291,7 @@ function getEditableCourses(page, courseList, onsuccess, onerror) {
           if(editUrl.indexOf('/') == 0) {
             editUrl = 'http://www.memrise.com' + editUrl;
           }
-          editableCourseList.push({ title: courseList[courseIndex].title, url: courseList[courseIndex].url, editUrl: editUrl });
+          editableCourseList.push({ id: courseList[courseIndex].id, title: courseList[courseIndex].title, url: courseList[courseIndex].url, editUrl: editUrl });
         }
 
         courseIndex++;
@@ -376,6 +386,62 @@ function addBulkWords(page, data, levelId, onsuccess, onerror) {
   }, 250);
 }
 
+function addLevel(page, courseId, onsuccess, onerror) {
+  page.navigate('http://www.memrise.com/course/' + courseId + '/course/edit/levels/', function(status) {
+    if(status == 'success') {
+      var lastLevelId = page.evaluate(function() {
+        if(!window.MemriseVocabulary) {
+          window.MemriseVocabulary = {};
+        }
+        window.MemriseVocabulary.AddLevelStarted = true;
+        return $('.levels > .level:last').attr('data-level-id');
+      });
+
+      var isDbFound = page.evaluate(function() {
+        var addButtons = $('a[data-role="level-add"]');
+        for(var i = 0; i < addButtons.length; i++) {
+          if($(addButtons[i]).text().trim().toLowerCase() == 'english') {
+            $(addButtons[i]).click();
+            return true;
+          }
+        }
+        return false;
+      });
+
+      if(isDbFound === false) {
+        onerror('Error occured while adding level, cannot find English database');
+      } else {
+        var timeout = 10000; // 10 sec
+        var startTime = new Date().getTime();
+        var interval = setInterval(function() {
+          var isTimedOut = new Date().getTime() - startTime >= timeout;
+          var isComplete = page.evaluate(function() {
+            return document.readyState == 'complete' && (!window.MemriseVocabulary || !window.MemriseVocabulary.AddLevelStarted);
+          });
+
+          if(isComplete) {
+            clearInterval(interval);
+            var newLevelId = page.evaluate(function() {
+              return $('.levels > .level:last').attr('data-level-id');
+            });
+            if(lastLevelId != newLevelId) {
+              levelId = newLevelId;
+              onsuccess(newLevelId);
+            } else {
+              onerror('Error occured while adding level, cannot add new level');
+            }
+          } else if(isTimedOut) {
+            clearInterval(interval);
+            onerror('Timeout is occured while adding level');
+          }
+        }, 250);
+      }
+    } else {
+      onerror('Error occured while adding level');
+    }
+  });
+}
+
 function addPronunciations(page, onsuccess, onerror) {
   page.navigate('http://www.memrise.com/course/' + courseId + '/course/edit/levels/', function(status) {
     if(status == 'success') {
@@ -420,7 +486,7 @@ function addPronunciations(page, onsuccess, onerror) {
           interval = setInterval(function() {
             clearInterval(interval);
             onsuccess();
-          }, 5000);
+          }, 10000);
         } else if(isTimedOut) {
           clearInterval(interval);
           onerror('Timeout is occured while uploading pronunciations');
@@ -433,7 +499,15 @@ function addPronunciations(page, onsuccess, onerror) {
 }
 
 var flowArray = null;
-if(operation == 'courselist') {
+if(operation == 'justcourselist') {
+  flowArray = [
+    { func: getLoginPage, params: [page] },
+    { func: submitLoginInfo, params: [page, username, password] },
+    { func: getCourseList, params: [page] },
+    { func: getEditableCourses, params: function(courseList) { return [page, courseList]; } }
+  ];
+}
+else if(operation == 'courselist') {
   flowArray = [
     { func: getLoginPage, params: [page] },
     { func: submitLoginInfo, params: [page, username, password] },
@@ -446,6 +520,14 @@ if(operation == 'courselist') {
     { func: getLoginPage, params: [page] },
     { func: submitLoginInfo, params: [page, username, password] },
     { func: addBulkWords, params: [page, data, levelId] },
+    { func: addPronunciations, params: [page] }
+  ];
+} else if(operation == 'addlevelandwords') {
+  flowArray = [
+    { func: getLoginPage, params: [page] },
+    { func: submitLoginInfo, params: [page, username, password] },
+    { func: addLevel, params: [page, courseId] },
+    { func: addBulkWords, params: function(newLevelId) { return [page, data, newLevelId]; } },
     { func: addPronunciations, params: [page] }
   ];
 }
