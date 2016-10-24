@@ -11,6 +11,7 @@ var model = {
     wordToAdd: '',
     selectedCourse: '',
     selectedLevel: '',
+    addWordsToDb: 'true',
     format: 'word,definition,,example',
 
     selectedWordIndex: -1,
@@ -115,7 +116,11 @@ var model = {
   $(document).ready(function(){
     viewModel = ko.mapping.fromJS(model);
 
-
+    viewModel.DeleteWord = function() {
+      var index = viewModel.dictionary.selectedWordIndex();
+      viewModel.dictionary.selectedWordIndex(-1);
+      viewModel.dictionary.wordList.remove(viewModel.dictionary.wordList()[index]);
+    }
     viewModel.WordListCount = function() {
       var setCount = 0;
       viewModel.dictionary.wordList().forEach(function(item, index) {
@@ -179,7 +184,7 @@ var model = {
         hideLoading();
       }, 120000);
 
-      $.post('/addToDB', { username: viewModel.userInfo.username(), password: viewModel.userInfo.password(), courseId: viewModel.dictionary.selectedCourse(), format: viewModel.dictionary.format(), wordList: encodeURIComponent(JSON.stringify(result)) }).done(function(result) {
+      $.post('/addToDB', { username: viewModel.userInfo.username(), password: viewModel.userInfo.password(), courseId: viewModel.dictionary.selectedCourse(), format: viewModel.dictionary.format(), addToDB: viewModel.dictionary.addWordsToDb(), wordList: encodeURIComponent(JSON.stringify(result)) }).done(function(result) {
         hideLoading();
         if(result.isSuccessful) {
           viewModel.dictionary.selectedWordIndex(-1);
@@ -277,6 +282,15 @@ var model = {
     viewModel.SetPronunciation = function(data, event) {
       var result = viewModel.dictionary.wordList()[viewModel.dictionary.selectedWordIndex()].selectedDefinition.isPronunciationSet();
       viewModel.dictionary.wordList()[viewModel.dictionary.selectedWordIndex()].selectedDefinition.isPronunciationSet(!result);
+    };
+    viewModel.RefetchDefinitions = function() {
+      var wordInfo = viewModel.dictionary.wordList()[viewModel.dictionary.selectedWordIndex()];
+      var sources = viewModel.dictionary.sources();
+      for(var i = 0; i < sources.length; i++) {
+        sources[i].fetch(wordInfo.word()).then(function(value) {
+          wordInfo.definitions[value.source](value.data);
+        });
+      }
     };
     viewModel.AddWord = function() {
       var word = viewModel.dictionary.wordToAdd().trim().toLowerCase();

@@ -131,9 +131,10 @@ router.post('/newlogin/', function(req, res, next) {
 router.post('/addToDB', function(req, res, next) {
   var courseId = req.body.courseId;
   var format = req.body.format;
+  var addWordsToDb = req.body.addToDB == 'true';
   var wordList = JSON.parse(decodeURIComponent(req.body.wordList));
 
-  mongodb.insertWordList(wordList, courseId, format, function(result) {
+  mongodb.insertWordList(wordList, courseId, format, addWordsToDb, function(result) {
     if(result.isSuccessful) {
       tasks.wordListTask(req.body.username, req.body.password, courseId);
     }

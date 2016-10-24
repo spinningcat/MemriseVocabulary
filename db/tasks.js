@@ -6,12 +6,12 @@ var http = require('http');
 var mongodb = require('./mongodb');
 
 function wordListTask(username, password, courseId) {
-  console.log('Word list task');
+  console.log('Word list task is starting');
   setTimeout(function () {
     mongodb.getWordList(courseId, function(result) {
       if(result.isSuccessful) {
         var wordList = result.data;
-        if(wordList.length == result.limit) {
+        if(wordList && wordList.length > 0) {
           var data = '';
           wordList.forEach(function(item, index) {
             data += item.format.toLowerCase().replace(/,/g, '\t').replace(/word/g, item.word).replace(/example/g, item.example).replace(/definition/g, item.definition) + '\n';
@@ -19,8 +19,8 @@ function wordListTask(username, password, courseId) {
           addWordListToMemrise( username, password, wordList, encodeURIComponent(data), encodeURIComponent(JSON.stringify(wordList)), courseId, function(result) {
             if(result.isSuccessful) {
               mongodb.setWordListAsLevelCreated(wordList, function(result) {
-                console.log(result);
                 if(result.isSuccessful) {
+                  console.log('Word list task finished successfully');
                   wordListTask(username, password, courseId);
                 } else {
                   console.error(result);

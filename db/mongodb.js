@@ -14,6 +14,7 @@ var dictionarySchema = new mongoose.Schema({
   example: { type: String },
   pronunciation: { type: String },
   isLevelCreated: { type: Boolean, default: false },
+  groupId: { type: Number },
   entryDate: { type: Date, default: Date.now }
 });
 
@@ -25,12 +26,12 @@ var countersSchema = new mongoose.Schema({
 var dictionary = mongoose.model('dictionary', dictionarySchema);
 var counters = mongoose.model('counters', countersSchema);
 
-function insertWord(wordInfo, callback) {
+function insertWord(wordInfo, groupId, callback) {
   counters.findOneAndUpdate( { _id: 'dictionary' }, { $inc: { seq: 1 } }, { new: true } ).exec( function(error, result) {
     if(error) {
       callback({isSuccessful: false, error: error});
     } else {
-      dictionary.update({ courseId: wordInfo.courseId, word: wordInfo.word }, { $setOnInsert: { _id: result.seq, format: wordInfo.format, definition: wordInfo.definition, example: wordInfo.example, pronunciation: wordInfo.pronunciation, isLevelCreated: false, entryDate: new Date() } }, { upsert: true }).exec(function(error, success) {
+      dictionary.update({ courseId: wordInfo.courseId, word: wordInfo.word }, { $setOnInsert: { _id: result.seq, format: wordInfo.format, definition: wordInfo.definition, example: wordInfo.example, pronunciation: wordInfo.pronunciation, isLevelCreated: false, groupId: groupId, entryDate: new Date() } }, { upsert: true }).exec(function(error, success) {
         if(error) {
           callback({isSuccessful: false, error: error});
         } else {
@@ -41,18 +42,18 @@ function insertWord(wordInfo, callback) {
   });
 }
 
-function insertWordList(wordList, courseId, format, callback) {
+function insertWordList(wordList, courseId, format, addWordsToDb, callback) {
   var index = 0;
 
-  function insertRecursively() {
+  function insertRecursively(groupId) {
     if(index < wordList.length) {
       wordList[index].courseId = courseId;
       wordList[index].format = format;
 
-      insertWord(wordList[index], function(result) {
+      insertWord(wordList[index], groupId, function(result) {
         if(result.isSuccessful) {
           index++;
-          insertRecursively();
+          insertRecursively(groupId);
         } else {
           callback(result);
         }
@@ -62,15 +63,36 @@ function insertWordList(wordList, courseId, format, callback) {
     }
   }
 
-  insertRecursively();
+  if(addWordsToDb) {
+    insertRecursively(0);
+  } else {
+    counters.findOneAndUpdate( { _id: 'dictionary' }, { $inc: { seq: 1 } }, { new: true } ).exec( function(error, result) {
+      if(error) {
+        callback({isSuccessful: false, error: error});
+      } else {
+        insertRecursively(result.seq);
+      }
+    });
+  }
 }
 
 function getWordList(courseId, callback) {
-  dictionary.find({ courseId: courseId, isLevelCreated: false }).sort({_id: 'asc'}).limit(wordListLimit).exec(function(error, result) {
+  dictionary.aggregate({ $match: { courseId: courseId, isLevelCreated: false } }, {$group: { _id : "$groupId",data: { $push: "$$ROOT" } }}, function(error, result) {
     if(error){
       callback({isSuccessful: false, error: error});
     } else {
-      callback({isSuccessful: true, data: result, limit: wordListLimit});
+      var data = null;
+      for(var i = 0; i < result.length; i++) {
+        if(result[i]._id == 0 && result[i].data.length >= wordListLimit) {
+          result[i].data.splice(wordListLimit);
+          data = result[i].data;
+          break;
+        } else if(result[i]._id > 0) {
+          data = result[i].data;
+          break;
+        }
+      }  
+      callback({isSuccessful: true, data: data});
     }
   });
 }

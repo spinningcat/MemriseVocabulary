@@ -42,6 +42,25 @@ block content
         div.col-md-8
           input#format.form-control(type="text", data-bind="value: dictionary.format")
         div.col-md-2
+      div.row
+        div.col-md-2
+        div.col-md-8
+          div(style="padding:8px 0 8px 0") Want to create level when word list reaches total of 20 words or create level with the words in the word list instantly ?
+        div.col-md-2
+      div.row
+        div.col-md-2
+        div.col-md-8
+          label
+            input(type="radio", name="levelCreationType", value="true", data-bind="checked:dictionary.addWordsToDb")
+            | Create with 20 words
+        div.col-md-2
+      div.row
+        div.col-md-2
+        div.col-md-8
+          label
+            input(type="radio", name="levelCreationType", value="false", data-bind="checked:dictionary.addWordsToDb")
+            | Create with the words in word list
+        div.col-md-2
 
   div#wordAdditionPanel.panel.panel-default
     div.panel-heading
@@ -70,6 +89,14 @@ block content
           div.source-div(data-bind="style: { width: viewModel.GetSourcePercentage() }")
             div(style="width:80%", data-bind="css: viewModel.GetColorCode(wordInfo.definitions[source.name()])") &nbsp;
         div.col-md-1.col-xs-2(data-bind="css: viewModel.GetDefinitionColorCode(wordInfo.selectedDefinition)") &nbsp;
+    div.panel-footer
+      div.row
+        div.col-md-8
+        div.col-md-2
+          button.btn.btn-primary.btn-block(type="button", data-bind="click:DeleteWord") Delete the word
+        div.col-md-2
+          button.btn.btn-primary.btn-block(type="button", data-bind="click:RefetchDefinitions") Refetch definitions
+
 
   div#wordDefinitionPanel.panel.panel-default
     div.panel-heading
