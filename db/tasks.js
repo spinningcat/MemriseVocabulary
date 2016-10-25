@@ -10,6 +10,7 @@ function wordListTask(username, password, courseId) {
   setTimeout(function () {
     mongodb.getWordList(courseId, function(result) {
       if(result.isSuccessful) {
+        console.log('Word list task fetch result : ' + result);
         var wordList = result.data;
         if(wordList && wordList.length > 0) {
           var data = '';
@@ -72,6 +73,7 @@ function addWordListToMemrise(username, password, wordList, data, pronunciations
     }
   });
 
+  console.log('Word list task, child process is starting');
   childProcess.execFile(phantomjs.path, childArgs, function(err, stdout, stderr) {
     if(fs.existsSync(requestFolder)) {
       fs.readdirSync(requestFolder).forEach(function(file,index){
