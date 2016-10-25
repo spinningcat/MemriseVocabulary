@@ -8,6 +8,7 @@ var http = require('http');
 var mongodb = require('../db/mongodb');
 var tasks = require('../db/tasks');
 
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'memvoc' });
@@ -126,6 +127,11 @@ router.post('/newlogin/', function(req, res, next) {
       responseObj.send(JSON.parse(stdout));
     }
   });
+});
+
+router.post('/tryToCreateLevels', function(req, res, next) {
+  tasks.wordListTask(req.body.username, req.body.password, req.body.courseId);
+  res.send('');
 });
 
 router.post('/addToDB', function(req, res, next) {

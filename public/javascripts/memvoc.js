@@ -116,6 +116,13 @@ var model = {
   $(document).ready(function(){
     viewModel = ko.mapping.fromJS(model);
 
+    viewModel.TryToCreateLevels = function() {
+      if(!viewModel.dictionary.selectedCourse() || viewModel.dictionary.selectedCourse() == ' ') {
+        alert('Select the course');
+        return;
+      }
+      $.post('/tryToCreateLevels', { username: viewModel.userInfo.username(), password: viewModel.userInfo.password(), courseId: viewModel.dictionary.selectedCourse() })
+    }
     viewModel.DeleteWord = function() {
       var index = viewModel.dictionary.selectedWordIndex();
       viewModel.dictionary.selectedWordIndex(-1);

@@ -61,6 +61,11 @@ block content
             input(type="radio", name="levelCreationType", value="false", data-bind="checked:dictionary.addWordsToDb")
             | Create with the words in word list
         div.col-md-2
+    div.panel-footer
+      div.row
+        div.col-md-10
+        div.col-md-2
+          button.btn.btn-primary.btn-block(type="button", data-bind="click:TryToCreateLevels") Recreate Levels
 
   div#wordAdditionPanel.panel.panel-default
     div.panel-heading
