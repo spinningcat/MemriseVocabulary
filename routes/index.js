@@ -130,7 +130,7 @@ router.post('/newlogin/', function(req, res, next) {
 });
 
 router.post('/tryToCreateLevels', function(req, res, next) {
-  tasks.wordListTask(req.body.username, req.body.password, req.body.courseId);
+  tasks.wordListTask(req.body.username, req.body.password, parseInt(req.body.courseId));
   res.send('');
 });
 
@@ -142,7 +142,7 @@ router.post('/addToDB', function(req, res, next) {
 
   mongodb.insertWordList(wordList, courseId, format, addWordsToDb, function(result) {
     if(result.isSuccessful) {
-      tasks.wordListTask(req.body.username, req.body.password, courseId);
+      tasks.wordListTask(req.body.username, req.body.password, parseInt(courseId));
     }
     res.send(result);
   });
