@@ -10,7 +10,8 @@ function wordListTask(username, password, courseId) {
   setTimeout(function () {
     mongodb.getWordList(courseId, function(result) {
       if(result.isSuccessful) {
-        console.log('Word list task fetch result : ' + result);
+        console.log('Word list task fetch result : ');
+        console.dir(result);
         var wordList = result.data;
         if(wordList && wordList.length > 0) {
           var data = '';
