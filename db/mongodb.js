@@ -83,6 +83,7 @@ function getWordList(courseId, callback) {
     } else {
       var data = null;
       for(var i = 0; i < result.length; i++) {
+        console.log(result[i]._id + '-' + result[i].data.length);
         if(result[i]._id == 0 && result[i].data.length >= wordListLimit) {
           result[i].data.splice(wordListLimit);
           data = result[i].data;
@@ -91,7 +92,7 @@ function getWordList(courseId, callback) {
           data = result[i].data;
           break;
         }
-      }  
+      }
       callback({isSuccessful: true, data: data});
     }
   });
